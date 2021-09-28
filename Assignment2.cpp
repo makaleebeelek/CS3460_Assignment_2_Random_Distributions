@@ -52,7 +52,7 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
     {
         if (i == 0)
         {
-            uniformDist.push_back(DistributionPair(0, step));
+            uniformDist.push_back(DistributionPair(min, step));
         }
         else
         {
@@ -111,7 +111,7 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
 std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, float mean, float stdev, std::uint8_t numberBins)
 {
     // the range of a bin
-    std::uint32_t step = howMany / numberBins;
+    std::uint32_t step = (howMany / numberBins);
     // initialize the vector to be returned
     std::vector<DistributionPair> uniformDist;
 
@@ -130,7 +130,84 @@ std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, 
     {
         if (i == 0)
         {
-            uniformDist.push_back(DistributionPair(0, step));
+            uniformDist.push_back(DistributionPair(min, step));
+        }
+        else
+        {
+            auto previousIndex = i - 1;
+            std::uint32_t previousMax = uniformDist[previousIndex].maxValue;
+            uniformDist.push_back(DistributionPair(previousMax + 1, previousMax + 1 + step));
+        }
+    }
+
+    // randomly generate a number and add 1 to the count of the correct bin
+    for (std::uint32_t j = 0; j < howMany; j++)
+    {
+        float randNum = dist(engine);
+
+        for (int k = 0; k < numberBins; k++)
+        {
+            if (k == 0)
+            {
+                if (randNum < uniformDist[k].maxValue + 1)
+                {
+                    uniformDist[k].count++;
+                }
+            }
+            else if (k == numberBins - 1)
+            {
+                if (randNum > uniformDist[k].minValue - 1)
+                {
+                    uniformDist[k].count++;
+                }
+            }
+            else
+            {
+                if (randNum > uniformDist[k].minValue - 1 && randNum < uniformDist[k].maxValue + 1)
+                {
+                    uniformDist[k].count++;
+                }
+            }
+        }
+    }
+
+    // return the correct vector
+    return uniformDist;
+};
+
+// generatePoissonDistribution function
+// inputs:
+//      -howMany: how many integers to randomly generate
+//      -howOften: goes in as the mean of the distribution
+//      -numberBins: how many bins to place the numbers in
+// outputs:
+//      return a DistributionPair vector that is a vector with numberBins
+//      amount of bins, each with their specified range and count
+// a function that generates howMany random numbers using poisson distribution
+// and bins them based on their value
+std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany, std::uint8_t howOften, std::uint8_t numberBins)
+{
+    // the range of a bin
+    std::uint32_t step = howMany / numberBins;
+    // initialize the vector to be returned
+    std::vector<DistributionPair> uniformDist;
+
+    // get the overall min
+    std::uint8_t min = 0;
+    // get the overall max
+    std::uint8_t max = numberBins - 1;
+
+    // use uniform integer distribution for random number generation
+    std::random_device rd;
+    std::default_random_engine engine(rd());
+    std::poisson_distribution<int> dist(howOften);
+
+    // set up the bins and define their range
+    for (std::uint8_t i = 0; i < numberBins; i++)
+    {
+        if (i == 0)
+        {
+            uniformDist.push_back(DistributionPair(min, step));
         }
         else
         {
@@ -174,10 +251,6 @@ std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, 
     // return the correct vector
     return uniformDist;
 };
-
-//std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany, std::uint8_t howOften, std::uint8_t numberBins)
-//{
-//};
 
 //void plotDistribution(std::string title, const std::vector<DistributionPair>& distribution, const std::uint8_t maxPlotLineSize)
 //{
