@@ -115,9 +115,7 @@ std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, 
     std::vector<DistributionPair> normalDist;
 
     // get the overall min
-    float min = mean - (4 * stdev);
-    // get the overall max
-    float max = mean + (4 * stdev) - 1;
+    std::uint32_t min = static_cast<std::uint32_t>(mean - (4 * stdev));
 
     // use uniform integer distribution for random number generation
     std::random_device rd;
@@ -191,8 +189,6 @@ std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany,
 
     // get the overall min
     std::uint8_t min = 0;
-    // get the overall max
-    std::uint8_t max = numberBins - 1;
 
     // use uniform integer distribution for random number generation
     std::random_device rd;
@@ -217,7 +213,7 @@ std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany,
     // randomly generate a number and add 1 to the count of the correct bin
     for (std::uint32_t j = 0; j < howMany; j++)
     {
-        float randNum = dist(engine);
+        std::uint32_t randNum = dist(engine);
 
         for (int k = 0; k < numberBins; k++)
         {
@@ -279,11 +275,11 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
     // plot each value in the distribution
     for (int j = 0; j < distribution.size(); j++)
     {
-        std::uint32_t numChar = ceil(charVal * distribution[j].count);
+        std::uint32_t numChar = static_cast<std::uint32_t>(ceil(charVal * distribution[j].count));
         
         std::cout << "[" << std::setw(3) << distribution[j].minValue << ", " << std::setw(3) << distribution[j].maxValue << "] : ";
         
-        for (int k = 0; k < numChar; k++)
+        for (std::uint32_t k = 0; k < numChar; k++)
         {
             std::cout << "*";        
         }
